@@ -14,7 +14,7 @@
 /* #undef BUILD_ARMJTAGEW */
 
 /* 0 if you don't want ART driver. */
-#define BUILD_ART 1
+#define BUILD_ART 0
 
 /* 0 if you don't want at91rm9200. */
 #define BUILD_AT91RM9200 0

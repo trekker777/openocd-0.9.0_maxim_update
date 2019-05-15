@@ -98,11 +98,12 @@ static int swd_run_inner(struct adiv5_dap *dap)
 	return retval;
 }
 
+
 static int swd_connect(struct adiv5_dap *dap)
 {
 	uint32_t idcode;
 	int status;
-	//LOG_INFO("SWD swd_connect");
+	static int first_run = 1;
 
 	/* FIXME validate transport config ... is the
 	 * configured DAP present (check IDCODE)?
@@ -110,6 +111,12 @@ static int swd_connect(struct adiv5_dap *dap)
 	 *
 	 * MUST READ IDCODE
 	 */
+
+	if (first_run) {
+		first_run = 0;
+		adapter_assert_reset();
+		usleep(5 * 1000);
+	}
 
 	/* Note, debugport_init() does setup too */
 	//LOG_INFO("SWD switch_seq");
@@ -128,15 +135,19 @@ static int swd_connect(struct adiv5_dap *dap)
 	status = swd_run_inner(dap);
 
 	if (status == ERROR_OK) {
-		LOG_INFO("SWD IDCODE: %#8.8" PRIx32, idcode);
+		LOG_INFO("SWD IDCODE %#8.8" PRIx32, idcode);
 		dap->do_reconnect = false;
-	} else {
-        LOG_INFO("Error trying to read the IDCODE");
+	} else
 		dap->do_reconnect = true;
-    }
 
+//	if (first_run) {
+//		usleep(5 * 1000);
+//		adapter_deassert_reset();
+//	}
+//	first_run = 0;
 	return status;
 }
+
 
 static inline int check_sync(struct adiv5_dap *dap)
 {
